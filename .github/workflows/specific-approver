@@ -1,0 +1,29 @@
+name: Manual Deployment with Custom Approval
+
+on:
+  workflow_dispatch:
+
+jobs:
+  request-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify for approval
+        run: echo "Approval required. Please review and approve to continue."
+
+      - name: Wait for approval
+        run: |
+          echo "Waiting for approval..."
+          # Simulating manual approval by checking for an approval condition
+          while [[ "$(gh pr checks | grep 'APPROVED' -c)" -eq 0 ]]; do
+            echo "Waiting for approval..."
+            sleep 10
+          done
+      - name: Proceed after approval
+        run: echo "Approval received, proceeding with deployment"
+
+  deploy:
+    needs: request-approval
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to production
+        run: echo "Deploying to production"
