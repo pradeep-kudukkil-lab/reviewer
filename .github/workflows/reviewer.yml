@@ -1,0 +1,19 @@
+name: Manual Deployment with Approval
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Display the user who triggered the workflow
+        run: echo "Triggered by ${{ github.actor }}"
+
+      - name: Deploy to production
+        run: echo "Deploying to production"
