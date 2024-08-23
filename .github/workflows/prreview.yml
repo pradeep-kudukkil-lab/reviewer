@@ -44,10 +44,27 @@ jobs:
             exit 1
           fi
 
-      - name: Echo the Reviewer's Name
+      - name: Read Input File
+        id: read_input_file
         run: |
-          echo "Deployment approved by: ${{ env.REVIEWER_NAME }}"
+          # Read values from the input file
+          while IFS=: read -r key value; do
+            case "$key" in
+              "name") APPROVER_NAME=$(echo $value | xargs) ;;
+              "age") AGE=$(echo $value | xargs) ;;
+              *) echo "Unknown key: $key" ;;
+            esac
+          done < input.txt
+
+          # Export values to environment variables
+          echo "APPROVER_NAME=$APPROVER_NAME" >> $GITHUB_ENV
+          echo "AGE=$AGE" >> $GITHUB_ENV
+
+      - name: Echo the Reviewer's Name and Age
+        run: |
+          echo "Deployment approved by: ${{ env.APPROVER_NAME }}"
+          echo "Age of the approver: ${{ env.AGE }}"
 
       - name: Deploy to Production
         run: |
-          echo "Deploying to production as approved by ${{ env.REVIEWER_NAME }}..."
+          echo "Deploying to production as approved by ${{ env.APPROVER_NAME }}..."
