@@ -36,6 +36,14 @@ jobs:
           REVIEWER_NAME=$(echo "$APPROVAL_INFO" | jq -r '.author.login')
           echo "REVIEWER_NAME=$REVIEWER_NAME" >> $GITHUB_ENV
 
+      - name: Check Approver
+        id: check_approver
+        run: |
+          if [ "${{ env.REVIEWER_NAME }}" != "ashiqpradeepsolutions" ]; then
+            echo "Error: Deployment not approved by the specified approver."
+            exit 1
+          fi
+
       - name: Echo the Reviewer's Name
         run: |
           echo "Deployment approved by: ${{ env.REVIEWER_NAME }}"
