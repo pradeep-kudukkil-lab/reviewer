@@ -3,13 +3,16 @@ name: Deploy to Production
 on:
   push:
     branches:
-      - main
+      - prod
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Set up GitHub CLI
+        run: sudo apt-get install -y gh
+
       - name: Get PR Number
         id: get_pr_number
         run: |
