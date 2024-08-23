@@ -1,0 +1,29 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get PR Number
+        id: get_pr_number
+        run: |
+          PR_NUMBER=$(gh pr list --state merged --base prod --json number --jq '.[0].number')
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+
+      - name: Get Reviewer's Name
+        id: get_reviewer_name
+        run: |
+          REVIEWER_NAME=$(gh pr view ${{ env.PR_NUMBER }} --json reviews --jq '.reviews | map(select(.state == "APPROVED")) | .[-1].author.login')
+          echo "REVIEWER_NAME=$REVIEWER_NAME" >> $GITHUB_ENV
+
+      - name: Echo the Reviewer's Name
+        run: echo "Deployment approved by: ${{ env.REVIEWER_NAME }}"
+
+      - name: Deploy to Production
+        run: echo "Deploying to production as approved by ${{ env.REVIEWER_NAME }}..."
