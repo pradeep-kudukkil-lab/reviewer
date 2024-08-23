@@ -4,32 +4,42 @@ on:
   pull_request:
     branches:
       - main
+    types: [closed] # Triggers only when the PR is closed (merged)
 
 jobs:
   deploy:
+    if: ${{ github.event.pull_request.merged }} # Ensure the PR is merged before running
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Get PR Information
-        id: pr_info
-        run: |
-          echo "PR Number: ${{ github.event.pull_request.number }}"
-          echo "PR Author: ${{ github.event.pull_request.user.login }}"
-          echo "PR Title: ${{ github.event.pull_request.title }}"
-          echo "PR Branch: ${{ github.head_ref }}"
-          echo "PR Base Branch: ${{ github.base_ref }}"
+      - name: Set up GitHub CLI
+        run: sudo apt-get install -y gh
 
-      - name: Echo the PR Information
+      - name: Get PR Number
+        id: get_pr_number
+        env:
+          GH_TOKEN: ${{ secrets.GITHUBTOKEN }}
         run: |
-          echo "PR Number: ${{ github.event.pull_request.number }}"
-          echo "PR Author: ${{ github.event.pull_request.user.login }}"
-          echo "PR Title: ${{ github.event.pull_request.title }}"
-          echo "PR Branch: ${{ github.head_ref }}"
-          echo "PR Base Branch: ${{ github.base_ref }}"
+          PR_NUMBER=$(gh pr view ${{ github.event.pull_request.number }} --json number --jq '.number')
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+
+      - name: Get PR Reviews
+        id: get_pr_reviews
+        env:
+          GH_TOKEN: ${{ secrets.GITHUBTOKEN }}
+        run: |
+          # Fetch all reviews and find the last approved review
+          APPROVAL_INFO=$(gh pr view ${{ env.PR_NUMBER }} --json reviews --jq '.reviews | map(select(.state == "APPROVED")) | .[-1]')
+          REVIEWER_NAME=$(echo "$APPROVAL_INFO" | jq -r '.author.login')
+          echo "REVIEWER_NAME=$REVIEWER_NAME" >> $GITHUB_ENV
+
+      - name: Echo the Reviewer's Name
+        run: |
+          echo "Deployment approved by: ${{ env.REVIEWER_NAME }}"
 
       - name: Deploy to Production
         run: |
-          echo "Deploying to production..."
+          echo "Deploying to production as approved by ${{ env.REVIEWER_NAME }}..."
