@@ -39,7 +39,7 @@ jobs:
       - name: Check Approver
         id: check_approver
         run: |
-          if [ "${{ env.REVIEWER_NAME }}" != "ashiqpradeepsolutions" ]; then
+          if [ "${{ env.REVIEWER_NAME }}" != "ashiqpradeepsolutionsp" ]; then
             echo "Error: Deployment not approved by the specified approver."
             exit 1
           fi
