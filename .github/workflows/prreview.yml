@@ -13,29 +13,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up GitHub CLI
-        run: sudo apt-get install -y gh
-
-      - name: Get PR Number
-        id: get_pr_number
-        env:
-          GH_TOKEN: ${{ secrets.GITHUBTOKEN }}
+      - name: Get PR Information
+        id: pr_info
         run: |
-          PR_NUMBER=$(gh pr list --state open --base main --json number --jq '.[0].number')
-          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "PR Author: ${{ github.event.pull_request.user.login }}"
+          echo "PR Title: ${{ github.event.pull_request.title }}"
+          echo "PR Branch: ${{ github.head_ref }}"
+          echo "PR Base Branch: ${{ github.base_ref }}"
 
-      - name: Get Reviewer's Name
-        id: get_reviewer_name
-        env:
-          GH_TOKEN: ${{ secrets.GITHUBTOKEN }}
+      - name: Echo the PR Information
         run: |
-          REVIEWER_NAME=$(gh pr view ${{ env.PR_NUMBER }} --json reviews --jq '.reviews | map(select(.state == "APPROVED")) | .[-1].author.login')
-          echo "REVIEWER_NAME=$REVIEWER_NAME" >> $GITHUB_ENV
-
-      - name: Echo the Reviewer's Name
-        run: |
-          echo "Deployment approved by: ${{ env.REVIEWER_NAME }}"
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "PR Author: ${{ github.event.pull_request.user.login }}"
+          echo "PR Title: ${{ github.event.pull_request.title }}"
+          echo "PR Branch: ${{ github.head_ref }}"
+          echo "PR Base Branch: ${{ github.base_ref }}"
 
       - name: Deploy to Production
         run: |
-          echo "Deploying to production as approved by ${{ env.REVIEWER_NAME }}..."
+          echo "Deploying to production..."
