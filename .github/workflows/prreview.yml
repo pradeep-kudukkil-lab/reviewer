@@ -3,8 +3,11 @@ name: Deploy to Production
 on:
   pull_request:
     branches:
-      - main
+      - pradeepprod
     types: [closed] # Triggers only when the PR is closed (merged)
+
+permissions:
+  pull-requests: read
 
 jobs:
   deploy:
@@ -21,7 +24,7 @@ jobs:
       - name: Get PR Number
         id: get_pr_number
         env:
-          GH_TOKEN: ${{ secrets.GITHUBTOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_NUMBER=$(gh pr view ${{ github.event.pull_request.number }} --json number --jq '.number')
           echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
@@ -29,7 +32,7 @@ jobs:
       - name: Get PR Reviews
         id: get_pr_reviews
         env:
-          GH_TOKEN: ${{ secrets.GITHUBTOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Fetch all reviews and find the last approved review
           APPROVAL_INFO=$(gh pr view ${{ env.PR_NUMBER }} --json reviews --jq '.reviews | map(select(.state == "APPROVED")) | .[-1]')
