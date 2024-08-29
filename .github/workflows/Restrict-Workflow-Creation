@@ -1,0 +1,25 @@
+name: Restrict Workflow Creation
+
+on:
+  push:
+    paths:
+      - .github/workflows/**
+
+jobs:
+  check-author:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Author
+        id: check_author
+        run: |
+          if [ "${{ github.actor }}" != "ashiqpradeepsolutions" ]; then
+            echo "This workflow can only be created or modified by ashiqpradeepsolutions."
+            exit 1
+          fi
+
+  perform-action:
+    needs: check-author
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo Success
+        run: echo "Workflow created or modified by authorized user: ${{ github.actor }}"
