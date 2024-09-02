@@ -9,7 +9,6 @@ permissions:
 
 jobs:
   deploy:
-    if: ${{ github.event.pull_request.merged }} # Ensure the PR is merged before running
     runs-on: ubuntu-latest
 
     steps:
