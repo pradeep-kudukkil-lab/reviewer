@@ -1,10 +1,8 @@
 name: Deploy to Production
 
 on:
-  pull_request:
-    branches:
-      - pradeepprod
-    types: [closed] # Triggers only when the PR is closed (merged)
+  pull_request_review:
+    types: [submitted]
 
 permissions:
   pull-requests: read
