@@ -1,4 +1,4 @@
-name: Deploy to Production
+name: Check Who Approved
 
 on:
   pull_request_review:
@@ -6,15 +6,16 @@ on:
 
 permissions:
   pull-requests: read
+  contents: read
+  id-token: write
+  actions: write
 
 jobs:
-  deploy:
+  check-approval:
+    if: ${{ github.event.review.state == 'approved' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
       - name: Set up GitHub CLI
         run: sudo apt-get install -y gh
 
@@ -31,7 +32,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Fetch all reviews and find the last approved review
           APPROVAL_INFO=$(gh pr view ${{ env.PR_NUMBER }} --json reviews --jq '.reviews | map(select(.state == "APPROVED")) | .[-1]')
           REVIEWER_NAME=$(echo "$APPROVAL_INFO" | jq -r '.author.login')
           echo "REVIEWER_NAME=$REVIEWER_NAME" >> $GITHUB_ENV
@@ -43,28 +43,3 @@ jobs:
             echo "Error: Deployment not approved by the specified approver."
             exit 1
           fi
-
-      - name: Read Input File
-        id: read_input_file
-        run: |
-          # Read values from the input file
-          while IFS=: read -r key value; do
-            case "$key" in
-              "name") APPROVER_NAME=$(echo $value | xargs) ;;
-              "age") AGE=$(echo $value | xargs) ;;
-              *) echo "Unknown key: $key" ;;
-            esac
-          done < input.txt
-
-          # Export values to environment variables
-          echo "APPROVER_NAME=$APPROVER_NAME" >> $GITHUB_ENV
-          echo "AGE=$AGE" >> $GITHUB_ENV
-
-      - name: Echo the Reviewer's Name and Age
-        run: |
-          echo "Deployment approved by: ${{ env.APPROVER_NAME }}"
-          echo "Age of the approver: ${{ env.AGE }}"
-
-      - name: Deploy to Production
-        run: |
-          echo "Deploying to production as approved by ${{ env.APPROVER_NAME }}..."
