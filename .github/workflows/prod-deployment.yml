@@ -1,0 +1,41 @@
+name: Deploy to Prod
+
+on:
+  pull_request:
+    branches:
+      - pradeepprod
+    types: [closed] # Triggers only when the PR is closed (merged)
+    paths:
+      - prod_input.txt
+
+jobs:
+  deploy:
+    if: ${{ github.event.pull_request.merged }} # Ensure the PR is merged before running
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Read Input File
+        id: read_input_file
+        run: |
+          while IFS=: read -r key value; do
+            case "$key" in
+              "name") APPROVER_NAME=$(echo $value | xargs) ;;
+              "age") AGE=$(echo $value | xargs) ;;
+              *) echo "Unknown key: $key" ;;
+            esac
+          done < prod_input.txt
+
+          echo "APPROVER_NAME=$APPROVER_NAME" >> $GITHUB_ENV
+          echo "AGE=$AGE" >> $GITHUB_ENV
+
+      - name: Echo the Reviewer's Name and Age
+        run: |
+          echo "Deployment approved by: ${{ env.APPROVER_NAME }}"
+          echo "Age of the approver: ${{ env.AGE }}"
+
+      - name: Deploy to Production
+        run: |
+          echo "Deploying to production as approved by ${{ env.APPROVER_NAME }}..."
