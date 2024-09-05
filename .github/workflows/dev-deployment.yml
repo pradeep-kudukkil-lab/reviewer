@@ -36,6 +36,6 @@ jobs:
           echo "Deployment approved by: ${{ env.APPROVER_NAME }}"
           echo "Age of the approver: ${{ env.AGE }}"
 
-      - name: Deploy to Production
+      - name: Deploy to Dev
         run: |
-          echo "Deploying to production as approved by ${{ env.APPROVER_NAME }}..."
+          echo "Deploying to Dev as approved by ${{ env.APPROVER_NAME }}..."
