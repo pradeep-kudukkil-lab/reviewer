@@ -1,10 +1,12 @@
-name: Deploy to Production
+name: Deploy to Dev
 
 on:
   pull_request:
     branches:
       - pradeepprod
     types: [closed] # Triggers only when the PR is closed (merged)
+    paths:
+      - dev_input.txt
 
 jobs:
   deploy:
@@ -13,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Read Input File
         id: read_input_file
@@ -24,7 +26,7 @@ jobs:
               "age") AGE=$(echo $value | xargs) ;;
               *) echo "Unknown key: $key" ;;
             esac
-          done < input.txt
+          done < dev_input.txt
 
           echo "APPROVER_NAME=$APPROVER_NAME" >> $GITHUB_ENV
           echo "AGE=$AGE" >> $GITHUB_ENV
